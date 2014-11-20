@@ -1,0 +1,84 @@
+#!/Users/media/perl5/perlbrew/perls/perl-5.20.0/bin/perl -CS
+
+use JSON::XS;
+use utf8;
+use strict;
+
+my $forecast = decode_json(`/Users/media/.bin/geektool-forecast`);
+
+print "high ", int($forecast->{daily}->{data}->[0]->{temperatureMax} + 0.5), "\x{B0}\n";
+print "low ", int($forecast->{daily}->{data}->[0]->{temperatureMin} + 0.5), "\x{B0}\n";
+
+my $now = time();
+
+for my $day (@{$forecast->{daily}->{data}})
+{
+	my @time;
+	my $event;
+
+	if ($now < $day->{sunriseTime})
+	{
+		@time = localtime($day->{sunriseTime});
+		$event = "\x{1F305} sunrise";
+	}
+	elsif ($now < $day->{sunsetTime})
+	{
+		@time = localtime($day->{sunsetTime});
+		$event = "\x{1F306} sunset";
+	}
+
+	if (defined($event))
+	{
+		my $min = $time[1];
+		my $hour = $time[2];
+		my $ampm = $hour < 12 ? 'AM' : 'PM';
+
+		if ($hour == 0)
+		{
+			$hour = 12;
+		}
+		elsif ($hour > 12)
+		{
+        		$hour -= 12;
+		}
+
+		print $event, ' at ', $hour, ':', sprintf('%02d', $min), ' ', $ampm, "\n";
+		last;
+	}
+}
+
+my $moon = $forecast->{daily}->{data}->[0]->{moonPhase};
+my $phase;
+
+if ($moon <= 0)
+{
+	$phase = "\x{1F311} new";
+}
+elsif ($moon < 0.25)
+{
+	$phase = "\x{1F312} waxing crescent";
+}
+elsif ($moon == 0.25)
+{
+	$phase = "\x{1F313} first quarter";
+}
+elsif ($moon < 0.5)
+{
+	$phase = "\x{1F314} waxing gibbous";
+}
+elsif ($moon == 0.5)
+{
+	$phase = "\x{1F315} full";
+}
+elsif ($moon < 0.75)
+{
+	$phase = "\x{1F316} waning gibbous";
+}
+elsif ($moon == 0.75)
+{
+	$phase = "\x{1F317} third quarter";
+}
+
+print $phase, "\n";
+exit(0);
+

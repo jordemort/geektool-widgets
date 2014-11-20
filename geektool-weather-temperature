@@ -1,0 +1,2 @@
+#!/bin/bash
+/Users/media/.bin/geektool-forecast | /opt/local/bin/jq -r .currently.temperature | perl -CS -e 'print int(<STDIN> + 0.5), "\x{B0}\n"'

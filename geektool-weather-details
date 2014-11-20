@@ -1,0 +1,49 @@
+#!/Users/media/perl5/perlbrew/perls/perl-5.20.0/bin/perl -CS
+
+use JSON::XS;
+use Text::Wrap;
+use utf8;
+use strict;
+
+my $forecast = decode_json(`/Users/media/.bin/geektool-forecast`);
+my $count = 0;
+
+for my $point (@{$forecast->{hourly}->{data}})
+{
+	my @time = localtime($point->{time});
+	my $min = $time[1];
+	my $hour = $time[2];
+	my $ampm = $hour < 12 ? 'AM' : 'PM';
+
+	if ($hour == 0)
+	{
+		$hour = 12;
+	}
+	elsif ($hour > 12)
+	{
+        	$hour -= 12;
+	}
+
+	print $hour, ':', sprintf('%02d', $min), ' ', $ampm, " - ",
+		int($point->{temperature} + 0.5), "\x{B0} - ", lc($point->{summary}), "\n";
+
+	$count++;
+	last if $count >= 5;
+}
+
+print "\n";
+$count = 0;
+
+my @days = ('SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT');
+
+for my $point (@{$forecast->{daily}->{data}})
+{
+	my @time = localtime($point->{time});
+	print $days[$time[6]], ' - high ',
+		int($point->{temperatureMax} + 0.5), "\x{B0}, low ",
+		int($point->{temperatureMin} + 0.5), "\x{B0}\n",
+		"\t", lc($point->{summary}), "\n";
+
+	$count++;
+	last if $count >= 5;
+}

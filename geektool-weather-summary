@@ -1,0 +1,2 @@
+#!/bin/bash
+/Users/media/.bin/geektool-forecast | /opt/local/bin/jq -r .currently.summary | perl -e 'print lc(<STDIN>)'

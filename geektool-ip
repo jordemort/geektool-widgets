@@ -1,0 +1,66 @@
+#!/Users/media/perl5/perlbrew/perls/perl-5.20.0/bin/perl -CS
+
+use Geo::IP;
+use JSON::XS;
+use utf8;
+use strict;
+
+my $ip = `dig +short myip.opendns.com \@resolver1.opendns.com`;
+$ip =~ s/\s+$//;
+print "$ip\n";
+
+my $gi = Geo::IP->open("/opt/local/share/GeoIP/GeoIPCity.dat", GEOIP_STANDARD);
+my $loc = $gi->record_by_addr($ip);
+my $flag = '_unknown.png';
+
+if (defined($loc))
+{
+	my @out;
+
+	if (defined($loc->city) and length($loc->city))
+	{
+		push @out, $loc->city;
+	}
+	if (defined($loc->region_name) and length($loc->region_name))
+	{
+		push @out, $loc->region_name;
+	}
+	if (defined($loc->country_code))
+	{
+		if (scalar(@out))
+		{
+			push @out, $loc->country_code;
+		}
+		else
+		{
+			push @out, $loc->country_name;
+		}
+
+		$flag = $loc->country_code . '.png';
+	}
+
+	if (scalar(@out))
+	{
+		print join(', ', @out), "\n";
+	}
+	else
+	{
+		print "No data\n";
+	}
+}
+else
+{
+	print "Unknown\n";
+}
+
+$flag = '/Users/media/.lib/flags-iso/shiny/48/' . $flag;
+
+if (!-e $flag)
+{
+	$flag = '/.lib/flags-iso/shiny/48/_unknown.png';
+}
+
+my $out = '/Users/media/.geektool-ip-flag.png';
+if (-e $out) { unlink($out); }
+symlink $flag, $out or die "Couldn't link flag: $!";
+

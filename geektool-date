@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+
+use POSIX qw(strftime);
+use strict;
+
+my @now = localtime();
+my $mday = $now[3];
+my $suffix = 'th';
+
+if ($mday <= 3 or $mday > 20)
+{
+	if ($mday % 10 == 1)
+	{
+		$suffix = 'st';
+	}
+	elsif ($mday % 10 == 2)
+	{
+		$suffix = 'nd';
+	}
+	elsif ($mday % 10 == 3)
+	{
+		$suffix = 'rd';
+	}
+}
+
+print strftime('%A, %B', @now), ' ', $mday, $suffix, "\n";
+
+my $min = $now[1];
+my $hour = $now[2];
+my $ampm = $hour < 12 ? 'AM' : 'PM';
+
+if ($hour == 0)
+{
+	$hour = 12;
+}
+elsif ($hour > 12)
+{
+	$hour -= 12;
+}
+
+print $hour, ':', sprintf('%02d', $min), ' ', $ampm, "\n";

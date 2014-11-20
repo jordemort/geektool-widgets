@@ -1,0 +1,30 @@
+#!/Users/media/perl5/perlbrew/perls/perl-5.20.0/bin/perl -CS
+
+use JSON::XS;
+use utf8;
+use strict;
+
+my %icons = (
+	'clear-day'	=> "\x{f00d}",	# wi-day-sunny 	 
+	'clear-night'	=> "\x{f02e}",	# wi-night-clear
+	'rain'	=> "\x{f019}", # wi-rain 	 
+	'snow'	=> "\x{f01b}", # wi-snow
+	'sleet'	=> "\x{f015}", # wi-hail 	 
+	'wind'	=> "\x{f021}", # wi-windy 	 
+	'fog'	=> "\x{f014}", # wi-fog 	 
+	'cloudy'	=> "\x{f013}", # wi-cloudy 	 
+	'partly-cloudy-day'	=> "\x{f002}", # wi-day-cloudy 	 
+	'partly-cloudy-night'	=> "\x{f031}", # wi-night-cloudy 	 
+);
+
+my $forecast = decode_json(`/Users/media/.bin/geektool-forecast`);
+
+if (exists $icons{$forecast->{currently}->{icon}})
+{
+	print $icons{$forecast->{currently}->{icon}}, "\n";
+}
+else
+{
+	print "?\n";
+}
+

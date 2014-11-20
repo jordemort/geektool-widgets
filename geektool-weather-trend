@@ -1,0 +1,49 @@
+#!/Users/media/perl5/perlbrew/perls/perl-5.20.0/bin/perl -CS
+
+use JSON::XS;
+use utf8;
+use strict;
+
+my $forecast = decode_json(`/Users/media/.bin/geektool-forecast`);
+my @hours = sort { $a->{time} <=> $b->{time} } @{$forecast->{hourly}->{data}};
+my $now = time();
+
+for my $i (0..$#hours)
+{
+	next unless $hours[$i]->{time} > $now;
+
+	my $now_secs = $hours[$i]->{time} - $now;
+	my $next_secs = $hours[$i+1]->{time} - $hours[$i]->{time};
+	my $itemp = (($hours[$i]->{temperature} * $now_secs) + ($hours[$i+1]->{temperature} * ($next_secs - $now_secs))) / $next_secs;
+	my $delta = $itemp - $forecast->{currently}->{temperature};
+
+	if ($delta >= 4)
+	{
+		print "\x{21D1} ";
+	}
+	elsif ($delta >= 2)
+	{
+		print "\x{2191} ";
+	}
+	elsif ($delta >= 1)
+	{
+		print "\x{21E1} ";
+	}
+	elsif ($delta <= -4)
+	{
+		print "\x{21D3} ";
+	}
+	elsif ($delta <= -2)
+	{
+		print "\x{2193} ";
+	}
+	elsif ($delta <= -1)
+	{
+		print "\x{21E3} ";
+	}
+	
+	last;
+}
+
+print int($forecast->{currently}->{temperature} + 0.5), "\x{B0}\n";
+exit(0);
